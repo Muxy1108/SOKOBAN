@@ -33,11 +33,13 @@ public class MapMatrix {
                     for (int col = 0; col < line.length(); col++) {
                         char c = line.charAt(col);
                         mapMatrix.matrix[row][col] = switch (c) {
-                            case '#' -> -1; // Wall
-                            case '.' -> 2;  // Target
-                            case '$' -> 1;  // Box
-                            case '@' -> 3;  // Hero
-                            default -> 0;   // Empty space
+                            case '0' -> 0;
+                            case '1' -> 1; // Wall
+                            case '4' -> 4;  // Target
+                            case '3' -> 3;  // Box
+                            case '5' -> 5;  // Hero
+                            case '2' -> 2;   // Empty space
+                            default  -> 0;
                         };
                     }
                     row++;

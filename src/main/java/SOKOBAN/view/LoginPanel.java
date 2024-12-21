@@ -13,6 +13,7 @@ import javafx.scene.text.Font;
 import javafx.stage.Stage;
 import SOKOBAN.model.User;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -60,8 +61,8 @@ public class LoginPanel {
             String password = passwordField.getText().trim();
             if (!username.isEmpty() && isUserExists(username)) {
                 File PasswordFile = new File("src/main/java/SOKOBAN/resources/users/" + username + ".txt");
-                //BufferedReader reader = new BufferedReader(new FileReader(filePath));
-                User user = new User(username, false,PasswordFile);
+               // BufferedReader reader = new BufferedReader(new FileReader(filePath));
+                User user = new User(username, false,password);
                 if (user.PasswordCorrect(password)) {
                     GamePanel gamePanel = new GamePanel(stage, user);
                     stage.getScene().setRoot(gamePanel.getRoot());
