@@ -1,0 +1,574 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
+import java.util.Stack;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+
+class mainpanel extends JPanel implements KeyListener {
+    int max = 50;
+    int[][] map;
+    int[][] maptmp;
+    int manX;
+    int manY;
+    int boxnum;
+    Image[] myImage;
+    Readmap Levelmap;
+    Readmap Levelmaptmp;
+    int len = 30;
+    public int level = 1;
+    Stack mystack = new Stack();
+
+    mainpanel() {
+        this.setBounds(15, 50, 600, 600);
+        this.setBackground(Color.white);
+        this.addKeyListener(this);
+        this.myImage = new Image[10];
+
+        for(int i = 0; i < 10; ++i) {
+            this.myImage[i] = Toolkit.getDefaultToolkit().getImage("pic\\" + i + ".gif");
+        }
+
+        this.setVisible(true);
+    }
+
+    void Tuixiangzi(int i) {
+        this.Levelmap = new Readmap(i);
+        this.Levelmaptmp = new Readmap(i);
+        this.map = this.Levelmap.getmap();
+        this.manX = this.Levelmap.getmanX();
+        this.manY = this.Levelmap.getmanY();
+        this.maptmp = this.Levelmaptmp.getmap();
+        this.repaint();
+    }
+
+    int maxlevel() {
+        return this.max;
+    }
+
+    public void paint(Graphics g) {
+        for(int i = 0; i < 20; ++i) {
+            for(int j = 0; j < 20; ++j) {
+                g.drawImage(this.myImage[this.map[j][i]], i * this.len, j * this.len, this);
+            }
+        }
+
+        g.setColor(new Color(0, 0, 0));
+
+        g.drawString("the", 240, 40);
+        g.drawString(String.valueOf(this.level), 310, 40);
+        g.drawString("level", 360, 40);
+    }
+
+    public void keyPressed(KeyEvent e) {
+        if (e.getKeyCode() == 38) {
+            this.moveup();
+        }
+
+        if (e.getKeyCode() == 40) {
+            this.movedown();
+        }
+
+        if (e.getKeyCode() == 37) {
+            this.moveleft();
+        }
+
+        if (e.getKeyCode() == 39) {
+            this.moveright();
+        }
+
+        if (this.iswin()) {
+            if (this.level == this.max) {
+                JOptionPane.showMessageDialog(this, "恭喜您通过最后一关！！！");
+            } else {
+                String msg = "Congratulations on passing the level" + this.level+"\n是否要进入下一关？";
+                int type = 0;
+                String title = "Congratulations ！";
+                int choice = 0;
+                 choice = JOptionPane.showConfirmDialog((Component)null, msg, title, type);
+                if (choice == 1) {
+                    System.exit(0);
+                } else if (choice == 0) {
+                    ++this.level;
+                    this.Tuixiangzi(this.level);
+                }
+            }
+
+            this.mystack.removeAllElements();
+        }
+
+    }
+
+    public void keyTyped(KeyEvent e) {
+    }
+
+    public void keyReleased(KeyEvent e) {
+    }
+
+    boolean isMystackEmpty() {
+        return this.mystack.isEmpty();
+    }
+
+    int back() {
+        return (Integer)this.mystack.pop();
+    }
+
+    void remove() {
+        this.mystack.removeAllElements();
+    }
+
+    void moveup() {
+        if (this.map[this.manY - 1][this.manX] != 2 && this.map[this.manY - 1][this.manX] != 4) {
+            if (this.map[this.manY - 1][this.manX] == 3) {
+                if (this.map[this.manY - 2][this.manX] == 4) {
+                    if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                        this.map[this.manY][this.manX] = 2;
+                    } else {
+                        this.map[this.manY][this.manX] = 4;
+                    }
+
+                    this.map[this.manY - 1][this.manX] = 8;
+                    this.map[this.manY - 2][this.manX] = 9;
+                    this.repaint();
+                    --this.manY;
+                    this.mystack.push(11);
+                } else if (this.map[this.manY - 2][this.manX] == 2) {
+                    if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                        this.map[this.manY][this.manX] = 2;
+                    } else {
+                        this.map[this.manY][this.manX] = 4;
+                    }
+
+                    this.map[this.manY - 1][this.manX] = 8;
+                    this.map[this.manY - 2][this.manX] = 3;
+                    this.repaint();
+                    --this.manY;
+                    this.mystack.push(11);
+                } else {
+                    this.map[this.manY][this.manX] = 8;
+                    this.repaint();
+                }
+            } else if (this.map[this.manY - 1][this.manX] == 9) {
+                if (this.map[this.manY - 2][this.manX] == 4) {
+                    if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                        this.map[this.manY][this.manX] = 2;
+                    } else {
+                        this.map[this.manY][this.manX] = 4;
+                    }
+
+                    this.map[this.manY - 1][this.manX] = 8;
+                    this.map[this.manY - 2][this.manX] = 9;
+                    this.repaint();
+                    --this.manY;
+                    this.mystack.push(11);
+                } else if (this.map[this.manY - 2][this.manX] == 2) {
+                    if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                        this.map[this.manY][this.manX] = 2;
+                    } else {
+                        this.map[this.manY][this.manX] = 4;
+                    }
+
+                    this.map[this.manY - 1][this.manX] = 8;
+                    this.map[this.manY - 2][this.manX] = 3;
+                    this.repaint();
+                    --this.manY;
+                    this.mystack.push(11);
+                } else {
+                    this.map[this.manY][this.manX] = 8;
+                    this.repaint();
+                }
+            }
+        } else {
+            if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                this.map[this.manY][this.manX] = 2;
+            } else {
+                this.map[this.manY][this.manX] = 4;
+            }
+
+            this.map[this.manY - 1][this.manX] = 8;
+            this.repaint();
+            --this.manY;
+            this.mystack.push(10);
+        }
+
+        if (this.map[this.manY - 1][this.manX] == 1) {
+            this.map[this.manY][this.manX] = 8;
+            this.repaint();
+        }
+
+    }
+
+    void backup(int t) {
+        int n = t;
+        if (n == 10) {
+            if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                this.map[this.manY][this.manX] = 2;
+            } else {
+                this.map[this.manY][this.manX] = 4;
+            }
+        } else if (n == 11) {
+            if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                this.map[this.manY][this.manX] = 3;
+            } else {
+                this.map[this.manY][this.manX] = 9;
+            }
+
+            if (this.maptmp[this.manY - 1][this.manX] != 4 && this.maptmp[this.manY - 1][this.manX] != 9) {
+                this.map[this.manY - 1][this.manX] = 2;
+            } else {
+                this.map[this.manY - 1][this.manX] = 4;
+            }
+        }
+
+        this.map[this.manY + 1][this.manX] = 8;
+        this.repaint();
+        ++this.manY;
+    }
+
+    void movedown() {
+        if (this.map[this.manY + 1][this.manX] != 2 && this.map[this.manY + 1][this.manX] != 4) {
+            if (this.map[this.manY + 1][this.manX] == 3) {
+                if (this.map[this.manY + 2][this.manX] == 4) {
+                    if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                        this.map[this.manY][this.manX] = 2;
+                    } else {
+                        this.map[this.manY][this.manX] = 4;
+                    }
+
+                    this.map[this.manY + 1][this.manX] = 5;
+                    this.map[this.manY + 2][this.manX] = 9;
+                    this.repaint();
+                    ++this.manY;
+                    this.mystack.push(21);
+                } else if (this.map[this.manY + 2][this.manX] == 2) {
+                    if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                        this.map[this.manY][this.manX] = 2;
+                    } else {
+                        this.map[this.manY][this.manX] = 4;
+                    }
+
+                    this.map[this.manY + 1][this.manX] = 5;
+                    this.map[this.manY + 2][this.manX] = 3;
+                    this.repaint();
+                    ++this.manY;
+                    this.mystack.push(21);
+                } else {
+                    this.map[this.manY][this.manX] = 5;
+                    this.repaint();
+                }
+            } else if (this.map[this.manY + 1][this.manX] == 9) {
+                if (this.map[this.manY + 2][this.manX] == 4) {
+                    if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                        this.map[this.manY][this.manX] = 2;
+                    } else {
+                        this.map[this.manY][this.manX] = 4;
+                    }
+
+                    this.map[this.manY + 1][this.manX] = 5;
+                    this.map[this.manY + 2][this.manX] = 9;
+                    this.repaint();
+                    ++this.manY;
+                    this.mystack.push(21);
+                } else if (this.map[this.manY + 2][this.manX] == 2) {
+                    if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                        this.map[this.manY][this.manX] = 2;
+                    } else {
+                        this.map[this.manY][this.manX] = 4;
+                    }
+
+                    this.map[this.manY + 1][this.manX] = 5;
+                    this.map[this.manY + 2][this.manX] = 3;
+                    this.repaint();
+                    ++this.manY;
+                    this.mystack.push(21);
+                } else {
+                    this.map[this.manY][this.manX] = 5;
+                    this.repaint();
+                }
+            } else if (this.map[this.manY + 1][this.manX] == 1) {
+                this.map[this.manY][this.manX] = 5;
+                this.repaint();
+            }
+        } else {
+            if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                this.map[this.manY][this.manX] = 2;
+            } else {
+                this.map[this.manY][this.manX] = 4;
+            }
+
+            this.map[this.manY + 1][this.manX] = 5;
+            this.repaint();
+            ++this.manY;
+            this.mystack.push(20);
+        }
+
+    }
+
+    void backdown(int t) {
+        int n = t;
+        if (n == 20) {
+            if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                this.map[this.manY][this.manX] = 2;
+            } else {
+                this.map[this.manY][this.manX] = 4;
+            }
+        } else if (n == 21) {
+            if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                this.map[this.manY][this.manX] = 3;
+            } else {
+                this.map[this.manY][this.manX] = 9;
+            }
+
+            if (this.maptmp[this.manY + 1][this.manX] != 4 && this.maptmp[this.manY + 1][this.manX] != 9) {
+                this.map[this.manY + 1][this.manX] = 2;
+            } else {
+                this.map[this.manY + 1][this.manX] = 4;
+            }
+        }
+
+        this.map[this.manY - 1][this.manX] = 5;
+        this.repaint();
+        --this.manY;
+    }
+
+    void moveleft() {
+        if (this.map[this.manY][this.manX - 1] != 2 && this.map[this.manY][this.manX - 1] != 4) {
+            if (this.map[this.manY][this.manX - 1] == 3) {
+                if (this.map[this.manY][this.manX - 2] == 4) {
+                    if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                        this.map[this.manY][this.manX] = 2;
+                    } else {
+                        this.map[this.manY][this.manX] = 4;
+                    }
+
+                    this.map[this.manY][this.manX - 1] = 6;
+                    this.map[this.manY][this.manX - 2] = 9;
+                    this.repaint();
+                    --this.manX;
+                    this.mystack.push(31);
+                } else if (this.map[this.manY][this.manX - 2] == 2) {
+                    if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                        this.map[this.manY][this.manX] = 2;
+                    } else {
+                        this.map[this.manY][this.manX] = 4;
+                    }
+
+                    this.map[this.manY][this.manX - 1] = 6;
+                    this.map[this.manY][this.manX - 2] = 3;
+                    this.repaint();
+                    --this.manX;
+                    this.mystack.push(31);
+                } else {
+                    this.map[this.manY][this.manX] = 6;
+                    this.repaint();
+                }
+            } else if (this.map[this.manY][this.manX - 1] == 9) {
+                if (this.map[this.manY][this.manX - 2] == 4) {
+                    if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                        this.map[this.manY][this.manX] = 2;
+                    } else {
+                        this.map[this.manY][this.manX] = 4;
+                    }
+
+                    this.map[this.manY][this.manX - 1] = 6;
+                    this.map[this.manY][this.manX - 2] = 9;
+                    this.repaint();
+                    --this.manX;
+                    this.mystack.push(31);
+                } else if (this.map[this.manY][this.manX - 2] == 2) {
+                    if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                        this.map[this.manY][this.manX] = 2;
+                    } else {
+                        this.map[this.manY][this.manX] = 4;
+                    }
+
+                    this.map[this.manY][this.manX - 1] = 6;
+                    this.map[this.manY][this.manX - 2] = 3;
+                    this.repaint();
+                    --this.manX;
+                    this.mystack.push(31);
+                } else {
+                    this.map[this.manY][this.manX] = 6;
+                    this.repaint();
+                }
+            } else if (this.map[this.manY][this.manX - 1] == 1) {
+                this.map[this.manY][this.manX] = 6;
+                this.repaint();
+            }
+        } else {
+            if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                this.map[this.manY][this.manX] = 2;
+            } else {
+                this.map[this.manY][this.manX] = 4;
+            }
+
+            this.map[this.manY][this.manX - 1] = 6;
+            this.repaint();
+            --this.manX;
+            this.mystack.push(30);
+        }
+
+    }
+
+    void backleft(int t) {
+        int n = t;
+        if (n == 30) {
+            if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                this.map[this.manY][this.manX] = 2;
+            } else {
+                this.map[this.manY][this.manX] = 4;
+            }
+        } else if (n == 31) {
+            if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                this.map[this.manY][this.manX] = 3;
+            } else {
+                this.map[this.manY][this.manX] = 9;
+            }
+
+            if (this.maptmp[this.manY][this.manX - 1] != 4 && this.maptmp[this.manY][this.manX - 1] != 9) {
+                this.map[this.manY][this.manX - 1] = 2;
+            } else {
+                this.map[this.manY][this.manX - 1] = 4;
+            }
+        }
+
+        this.map[this.manY][this.manX + 1] = 6;
+        this.repaint();
+        ++this.manX;
+    }
+
+    void moveright() {
+        if (this.map[this.manY][this.manX + 1] != 2 && this.map[this.manY][this.manX + 1] != 4) {
+            if (this.map[this.manY][this.manX + 1] == 3) {
+                if (this.map[this.manY][this.manX + 2] == 4) {
+                    if (this.maptmp[this.manY][this.manX] == 4) {
+                        this.map[this.manY][this.manX] = 4;
+                    } else {
+                        this.map[this.manY][this.manX] = 2;
+                    }
+
+                    this.map[this.manY][this.manX + 1] = 7;
+                    this.map[this.manY][this.manX + 2] = 9;
+                    this.repaint();
+                    ++this.manX;
+                    this.mystack.push(41);
+                } else if (this.map[this.manY][this.manX + 2] == 2) {
+                    if (this.maptmp[this.manY][this.manX] == 4) {
+                        this.map[this.manY][this.manX] = 4;
+                    } else {
+                        this.map[this.manY][this.manX] = 2;
+                    }
+
+                    this.map[this.manY][this.manX + 1] = 7;
+                    this.map[this.manY][this.manX + 2] = 3;
+                    this.repaint();
+                    ++this.manX;
+                    this.mystack.push(41);
+                } else {
+                    this.map[this.manY][this.manX] = 7;
+                    this.repaint();
+                }
+            } else if (this.map[this.manY][this.manX + 1] == 9) {
+                if (this.map[this.manY][this.manX + 2] == 4) {
+                    if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                        this.map[this.manY][this.manX] = 2;
+                    } else {
+                        this.map[this.manY][this.manX] = 4;
+                    }
+
+                    this.map[this.manY][this.manX + 1] = 7;
+                    this.map[this.manY][this.manX + 2] = 9;
+                    this.repaint();
+                    ++this.manX;
+                    this.mystack.push(41);
+                } else if (this.map[this.manY][this.manX + 2] == 2) {
+                    if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                        this.map[this.manY][this.manX] = 2;
+                    } else {
+                        this.map[this.manY][this.manX] = 4;
+                    }
+
+                    this.map[this.manY][this.manX + 1] = 7;
+                    this.map[this.manY][this.manX + 2] = 3;
+                    this.repaint();
+                    ++this.manX;
+                    this.mystack.push(41);
+                } else {
+                    this.map[this.manY][this.manX] = 7;
+                    this.repaint();
+                }
+            } else if (this.map[this.manY][this.manX + 1] == 1) {
+                this.map[this.manY][this.manX] = 7;
+                this.repaint();
+            }
+        } else {
+            if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                this.map[this.manY][this.manX] = 2;
+            } else {
+                this.map[this.manY][this.manX] = 4;
+            }
+
+            this.map[this.manY][this.manX + 1] = 7;
+            this.repaint();
+            ++this.manX;
+            this.mystack.push(40);
+        }
+
+    }
+
+    void backright(int t) {
+        int n = t;
+        if (n == 40) {
+            if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                this.map[this.manY][this.manX] = 2;
+            } else {
+                this.map[this.manY][this.manX] = 4;
+            }
+        } else if (n == 41) {
+            if (this.maptmp[this.manY][this.manX] != 4 && this.maptmp[this.manY][this.manX] != 9) {
+                this.map[this.manY][this.manX] = 3;
+            } else {
+                this.map[this.manY][this.manX] = 9;
+            }
+
+            if (this.maptmp[this.manY][this.manX + 1] != 4 && this.maptmp[this.manY][this.manX + 1] != 9) {
+                this.map[this.manY][this.manX + 1] = 2;
+            } else {
+                this.map[this.manY][this.manX + 1] = 4;
+            }
+        }
+
+        this.map[this.manY][this.manX - 1] = 7;
+        this.repaint();
+        --this.manX;
+    }
+
+    boolean iswin() {
+        boolean num = false;
+
+        for(int i = 0; i < 20; ++i) {
+            for(int j = 0; j < 20; ++j) {
+                if (this.maptmp[i][j] == 4 || this.maptmp[i][j] == 9) {
+                    if (this.map[i][j] != 9) {
+                        num = false;
+                        return num;
+                    }
+
+                    num = true;
+                }
+            }
+        }
+
+        return num;
+    }
+}
