@@ -1,0 +1,79 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+
+class Readmap {
+    private int level;
+    private int mx;
+    private int my;
+    private int[][] mymap = new int[20][20];
+    FileReader r;
+    BufferedReader br;
+    String bb = "";
+    int[] x;
+    int c = 0;
+
+    Readmap(int k) {
+        this.level = k;
+
+        IOException g;
+        try {
+            File f = new File("maps\\" + this.level + ".map");
+            this.r = new FileReader(f);
+            this.br = new BufferedReader(this.r);
+        } catch (IOException var8) {
+            g = var8;
+            System.out.println(g);
+        }
+
+        String s;
+        try {
+            while((s = this.br.readLine()) != null) {
+                this.bb = this.bb + s;
+            }
+        } catch (IOException var9) {
+            g = var9;
+            System.out.println(g);
+        }
+
+        byte[] d = this.bb.getBytes();
+        int len = this.bb.length();
+        int[] x = new int[len];
+
+        int i;
+        for(i = 0; i < this.bb.length(); ++i) {
+            x[i] = d[i] - 48;
+        }
+
+        for(i = 0; i < 20; ++i) {
+            for(int j = 0; j < 20; ++j) {
+                this.mymap[i][j] = x[this.c];
+                if (this.mymap[i][j] == 5) {
+                    this.mx = j;
+                    this.my = i;
+                }
+
+                ++this.c;
+            }
+        }
+
+    }
+
+    int[][] getmap() {
+        return this.mymap;
+    }
+
+    int getmanX() {
+        return this.mx;
+    }
+
+    int getmanY() {
+        return this.my;
+    }
+}
