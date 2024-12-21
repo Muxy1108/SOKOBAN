@@ -1,0 +1,351 @@
+
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+import java.awt.Color;
+import java.awt.Container;
+import java.awt.LayoutManager;
+import java.awt.Menu;
+import java.awt.MenuBar;
+import java.awt.MenuItem;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
+class mainFrame extends JFrame implements ActionListener, ItemListener {
+    JLabel lb;
+    JLabel lb2;
+    JButton btnrenew;
+    JButton btnlast;
+    JButton btnnext;
+    JButton btnchoose;
+    JButton btnfirst;
+    JButton btnover;
+    JButton btnmuc;
+    JButton btnback;
+    mainpanel panel;
+    Sound sound;
+    JComboBox jc = new JComboBox();
+    MenuItem renew = new MenuItem("    RESTART");
+    MenuItem back = new MenuItem("    RETRACT");
+    MenuItem last = new MenuItem("    PREVIOUS");
+    MenuItem next = new MenuItem("    NEXT");
+    MenuItem choose = new MenuItem("    SELECT");
+    MenuItem exit = new MenuItem("    QUIT");
+    MenuItem qin = new MenuItem("    qin");
+    MenuItem po = new MenuItem("    popo");
+    MenuItem guang = new MenuItem("    guang");
+    MenuItem nor = new MenuItem("    nor");
+    MenuItem eye = new MenuItem("    eyes on me");
+    MenuItem about = new MenuItem("    About Sokoban");
+
+    mainFrame() {
+        super("Sokoban");
+        this.setSize(720, 720);
+        this.setVisible(true);
+        this.setResizable(false);
+        this.setLocation(300, 20);
+        this.setDefaultCloseOperation(3);
+        Container cont = this.getContentPane();
+        cont.setLayout((LayoutManager)null);
+        cont.setBackground(Color.black);
+        Menu choice = new Menu("    OPTIONS");
+        choice.add(this.renew);
+        choice.add(this.last);
+        choice.add(this.next);
+        choice.add(this.choose);
+        choice.add(this.back);
+        choice.addSeparator();
+        choice.add(this.exit);
+        this.renew.addActionListener(this);
+        this.last.addActionListener(this);
+        this.next.addActionListener(this);
+        this.choose.addActionListener(this);
+        this.exit.addActionListener(this);
+        this.back.addActionListener(this);
+        Menu setmuc = new Menu("    Set music");
+        setmuc.add(this.nor);
+        setmuc.add(this.qin);
+        setmuc.add(this.po);
+        setmuc.add(this.guang);
+        setmuc.add(this.eye);
+        this.nor.addActionListener(this);
+        this.qin.addActionListener(this);
+        this.po.addActionListener(this);
+        this.guang.addActionListener(this);
+        this.eye.addActionListener(this);
+        Menu help = new Menu("    HELP");
+        help.add(this.about);
+        this.about.addActionListener(this);
+        MenuBar bar = new MenuBar();
+        bar.add(choice);
+        bar.add(setmuc);
+        bar.add(help);
+        this.setMenuBar(bar);
+        this.nor.setEnabled(false);
+        this.lb = new JLabel("SOKOBAN！", 0);
+        this.lb2 = new JLabel("change music", 0);
+        this.add(this.lb);
+        this.add(this.lb2);
+        this.lb.setBounds(100, 20, 400, 20);
+        this.lb.setForeground(Color.white);
+        this.lb2.setBounds(625, 500, 55, 20);
+        this.lb2.setForeground(Color.white);
+        this.btnrenew = new JButton("RESTART");
+        this.btnback = new JButton("RETRACT");
+        this.btnlast = new JButton("PREVIOUS");
+        this.btnnext = new JButton("NEXT");
+        this.btnchoose = new JButton("SELECT");
+        this.btnfirst = new JButton("The 1 level");
+        this.btnover = new JButton("The last level");
+        this.btnmuc = new JButton("Music Off");
+        this.add(this.btnrenew);
+        this.add(this.btnlast);
+        this.add(this.btnnext);
+        this.add(this.btnchoose);
+        this.add(this.btnfirst);
+        this.add(this.btnover);
+        this.add(this.btnmuc);
+        this.add(this.btnback);
+        this.btnrenew.setBounds(625, 100, 80, 30);
+        this.btnrenew.addActionListener(this);
+        this.btnback.setBounds(625, 150, 80, 30);
+        this.btnback.addActionListener(this);
+        this.btnfirst.setBounds(625, 200, 80, 30);
+        this.btnfirst.addActionListener(this);
+        this.btnlast.setBounds(625, 250, 80, 30);
+        this.btnlast.addActionListener(this);
+        this.btnnext.setBounds(625, 300, 80, 30);
+        this.btnnext.addActionListener(this);
+        this.btnover.setBounds(625, 350, 80, 30);
+        this.btnover.addActionListener(this);
+        this.btnchoose.setBounds(625, 400, 80, 30);
+        this.btnchoose.addActionListener(this);
+        this.btnmuc.setBounds(625, 450, 80, 30);
+        this.btnmuc.addActionListener(this);
+        this.jc.setBounds(625, 530, 80, 20);
+        this.jc.addItem("nor");
+        this.jc.addItem("qin");
+        this.jc.addItem("popo");
+        this.jc.addItem("guang");
+        this.jc.addItem("eyes on me");
+        this.jc.addItemListener(this);
+        cont.add(this.jc);
+        this.sound = new Sound();
+        this.sound.loadSound();
+        this.panel = new mainpanel();
+        this.add(this.panel);
+        this.panel.Tuixiangzi(this.panel.level);
+        this.panel.requestFocus();
+        this.validate();
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() != this.btnrenew && e.getSource() != this.renew) {
+            if (e.getSource() != this.btnlast && e.getSource() != this.last) {
+                if (e.getSource() != this.btnnext && e.getSource() != this.next) {
+                    if (e.getSource() == this.exit) {
+                        System.exit(0);
+                    } else if (e.getSource() == this.about) {
+                        JOptionPane.showMessageDialog(this, "JAVA推箱子游戏");
+                    } else if (e.getSource() != this.btnchoose && e.getSource() != this.choose) {
+                        if (e.getSource() == this.btnfirst) {
+                            this.panel.level = 1;
+                            this.panel.Tuixiangzi(this.panel.level);
+                            this.panel.requestFocus();
+                            this.panel.remove();
+                        } else if (e.getSource() == this.btnover) {
+                            this.panel.level = this.panel.maxlevel();
+                            this.panel.Tuixiangzi(this.panel.level);
+                            this.panel.requestFocus();
+                            this.panel.remove();
+                        } else if (e.getSource() == this.btnmuc) {
+                            if (this.sound.isplay()) {
+                                this.sound.mystop();
+                                this.btnmuc.setLabel("MUSIC ON");
+                            } else {
+                                this.sound.loadSound();
+                                this.btnmuc.setLabel("Music Off");
+                            }
+
+                            this.panel.requestFocus();
+                        } else if (e.getSource() != this.btnback && e.getSource() != this.back) {
+                            if (e.getSource() == this.nor) {
+                                this.jc.setSelectedIndex(0);
+                            } else if (e.getSource() == this.qin) {
+                                this.jc.setSelectedIndex(1);
+                            } else if (e.getSource() == this.guang) {
+                                this.jc.setSelectedIndex(3);
+                            } else if (e.getSource() == this.eye) {
+                                this.jc.setSelectedIndex(4);
+                            } else if (e.getSource() == this.po) {
+                                this.jc.setSelectedIndex(2);
+                            }
+                        } else {
+                            if (this.panel.isMystackEmpty()) {
+                                JOptionPane.showMessageDialog(this, "您还未移动！！！");
+                            } else {
+                                switch (this.panel.back()) {
+                                    case 10:
+                                        this.panel.backup(10);
+                                        break;
+                                    case 11:
+                                        this.panel.backup(11);
+                                        break;
+                                    case 20:
+                                        this.panel.backdown(20);
+                                        break;
+                                    case 21:
+                                        this.panel.backdown(21);
+                                        break;
+                                    case 30:
+                                        this.panel.backleft(30);
+                                        break;
+                                    case 31:
+                                        this.panel.backleft(31);
+                                        break;
+                                    case 40:
+                                        this.panel.backright(40);
+                                        break;
+                                    case 41:
+                                        this.panel.backright(41);
+                                }
+                            }
+
+                            this.panel.requestFocus();
+                        }
+                    } else {
+                        String lel = JOptionPane.showInputDialog(this, "ENTER THE LEVEL YOU WANT TO GO:(1~50)");
+                        this.panel.level = Integer.parseInt(lel);
+                        this.panel.remove();
+                        if (this.panel.level <= this.panel.maxlevel() && this.panel.level >= 1) {
+                            this.panel.Tuixiangzi(this.panel.level);
+                            this.panel.requestFocus();
+                        } else {
+                            JOptionPane.showMessageDialog(this, "NO");
+                            this.panel.requestFocus();
+                        }
+                    }
+                } else {
+                    ++this.panel.level;
+                    if (this.panel.level > this.panel.maxlevel()) {
+                        --this.panel.level;
+                        JOptionPane.showMessageDialog(this, "THE LAST ONE");
+                        this.panel.requestFocus();
+                    } else {
+                        this.panel.Tuixiangzi(this.panel.level);
+                        this.panel.requestFocus();
+                    }
+
+                    this.panel.remove();
+                }
+            } else {
+                --this.panel.level;
+                if (this.panel.level < 1) {
+                    ++this.panel.level;
+                    JOptionPane.showMessageDialog(this, "THE FIRST ONE");
+                    this.panel.requestFocus();
+                } else {
+                    this.panel.Tuixiangzi(this.panel.level);
+                    this.panel.requestFocus();
+                }
+
+                this.panel.remove();
+            }
+        } else {
+            this.panel.Tuixiangzi(this.panel.level);
+            this.panel.requestFocus();
+            this.panel.remove();
+        }
+
+    }
+
+    public void itemStateChanged(ItemEvent ie) {
+        int no = this.jc.getSelectedIndex();
+        switch (no) {
+            case 0:
+                this.sound.setMusic("nor.mid");
+                if (this.sound.isplay()) {
+                    this.sound.mystop();
+                }
+
+                this.sound.loadSound();
+                this.btnmuc.setLabel("Music Off");
+                this.nor.setEnabled(false);
+                this.qin.setEnabled(true);
+                this.guang.setEnabled(true);
+                this.eye.setEnabled(true);
+                this.po.setEnabled(true);
+                this.panel.requestFocus();
+                break;
+            case 1:
+                this.sound.setMusic("qin.mid");
+                if (this.sound.isplay()) {
+                    this.sound.mystop();
+                }
+
+                this.sound.loadSound();
+                this.btnmuc.setLabel("Music Off");
+                this.nor.setEnabled(true);
+                this.qin.setEnabled(false);
+                this.guang.setEnabled(true);
+                this.eye.setEnabled(true);
+                this.po.setEnabled(true);
+                this.panel.requestFocus();
+                break;
+            case 2:
+                this.sound.setMusic("popo.mid");
+                if (this.sound.isplay()) {
+                    this.sound.mystop();
+                }
+
+                this.sound.loadSound();
+                this.btnmuc.setLabel("Music Off");
+                this.nor.setEnabled(true);
+                this.qin.setEnabled(true);
+                this.guang.setEnabled(true);
+                this.eye.setEnabled(true);
+                this.po.setEnabled(false);
+                this.panel.requestFocus();
+                break;
+            case 3:
+                this.sound.setMusic("guang.mid");
+                if (this.sound.isplay()) {
+                    this.sound.mystop();
+                }
+
+                this.sound.loadSound();
+                this.btnmuc.setLabel("Music Off");
+                this.nor.setEnabled(true);
+                this.qin.setEnabled(true);
+                this.guang.setEnabled(false);
+                this.eye.setEnabled(true);
+                this.po.setEnabled(true);
+                this.panel.requestFocus();
+                break;
+            case 4:
+                this.sound.setMusic("4.mid");
+                if (this.sound.isplay()) {
+                    this.sound.mystop();
+                }
+
+                this.sound.loadSound();
+                this.btnmuc.setLabel("Music Off");
+                this.nor.setEnabled(true);
+                this.qin.setEnabled(true);
+                this.guang.setEnabled(true);
+                this.eye.setEnabled(false);
+                this.po.setEnabled(true);
+                this.panel.requestFocus();
+        }
+
+    }
+}
