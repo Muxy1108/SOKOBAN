@@ -2,7 +2,12 @@ package SOKOBAN.model;
 
 import java.io.*;
 import SOKOBAN.controller.GameController;
-
+//0
+//1 墙
+//2空格
+//3箱子
+//4指定地点
+//hero
 public class MapMatrix {
     private int[][] matrix;
 

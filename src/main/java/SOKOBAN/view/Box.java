@@ -1,16 +1,14 @@
 package SOKOBAN.view;
 
-public class Box {
-    private int row;
-    private int col;
+public class Box extends Movable{
 
     public Box(int row, int col) {
-        this.row = row;
-        this.col = col;
+        this.setRow(row);
+        this.setCol(col);
     }
 
     public void move(int newRow, int newCol) {
-        this.row = newRow;
-        this.col = newCol;
+        this.setRow(newRow);
+        this.setCol(newCol);
     }
 }
