@@ -1,0 +1,8 @@
+public class Tuixiangzi {
+    public Tuixiangzi() {
+    }
+
+    public static void main(String[] args) {
+        new mainFrame();
+    }
+}
