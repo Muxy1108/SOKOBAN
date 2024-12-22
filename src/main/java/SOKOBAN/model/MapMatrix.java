@@ -10,6 +10,12 @@ import SOKOBAN.controller.GameController;
 //hero
 public class MapMatrix {
     private int[][] matrix;
+    private int[][] initialMatrix;
+    public static int loadNum;
+
+    public void setInitialMatrix(int[][] initialMatrix) {
+        this.initialMatrix = initialMatrix;
+    }
 
     public void setMatrix(int[][] matrix) {
         this.matrix = matrix;
@@ -18,6 +24,7 @@ public class MapMatrix {
 
 
     public static MapMatrix loadLevel(int level) {
+        loadNum = level;
         MapMatrix mapMatrix = new MapMatrix();
         try (BufferedReader reader = new BufferedReader(new FileReader("src/main/java/SOKOBAN/resources/maps/level" + level + ".txt"))) {
             String line;
@@ -30,6 +37,7 @@ public class MapMatrix {
             }
 
             mapMatrix.matrix = new int[rows][cols];
+            mapMatrix.initialMatrix = new int[rows][cols];
             reader.close();
 
             try (BufferedReader secondReader = new BufferedReader(new FileReader("src/main/java/SOKOBAN/resources/maps/level" + level + ".txt"))) {
@@ -44,7 +52,16 @@ public class MapMatrix {
                             case '3' -> 3;  // Box
                             case '5' -> 5;  // Hero
                             case '2' -> 2;   // Empty space
-                            default  -> 0;
+                            default  -> -1;
+                        };
+                        mapMatrix.initialMatrix[row][col] = switch (c) {
+                            case '0' -> 0;
+                            case '1' -> 1; // Wall
+                            case '4' -> 4;  // Target
+                            case '3' -> 3;  // Box
+                            case '5' -> 5;  // Hero
+                            case '2' -> 2;   // Empty space
+                            default  -> -1;
                         };
                     }
                     row++;
@@ -76,5 +93,8 @@ public class MapMatrix {
 
     public int[][] getMatrix() {
         return matrix;
+    }
+    public int[][] getInitialMatrix() {
+        return initialMatrix;
     }
 }

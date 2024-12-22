@@ -7,9 +7,9 @@ import SOKOBAN.model.User;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.image.Image;
 import javafx.scene.layout.*;
-import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.File;
@@ -31,7 +31,7 @@ public class GamePanel {
 
         gameGrid = new GridPane();
 
-        MapMatrix map = loadGameOrLevel(user);
+        MapMatrix map = loadGameOrLevel(user, 1); // Default level is 1
         controller = new GameController(gameGrid, map);
 
         setupControlPanel(stage, user);
@@ -50,9 +50,10 @@ public class GamePanel {
         stage.setScene(scene);
     }
 
+    /**
+     * Adds a background image to the root layout.
+     */
     private void setBackgroundImage() {
-        // Use resource path instead of file path for better portability
-        //Image backgroundImage = new Image(("src/main/java/SOKOBAN/resources/images/game_background.png").toExternalForm());
         Image backgroundImage = new Image("file:src/main/java/SOKOBAN/resources/images/game_background.png");
         BackgroundImage bgImage = new BackgroundImage(
                 backgroundImage,
@@ -64,14 +65,21 @@ public class GamePanel {
         root.setBackground(new Background(bgImage));
     }
 
-    private MapMatrix loadGameOrLevel(User user) {
+    /**
+     * Loads the game state or initializes a specific level.
+     */
+    private MapMatrix loadGameOrLevel(User user, int level) {
+
         if (!user.isGuest() && new File(user.getSaveFileName()).exists()) {
             return MapMatrix.loadFromFile(user.getSaveFileName());
         } else {
-            return MapMatrix.loadLevel(1);
+            return MapMatrix.loadLevel(level);
         }
     }
 
+    /**
+     * Sets up the control panel with Save, Restart, and Load Level buttons.
+     */
     private void setupControlPanel(Stage stage, User user) {
         // Create Save button
         Button saveButton = createStyledButton("Save", e -> {
@@ -89,9 +97,28 @@ public class GamePanel {
             root.requestFocus();
         });
 
-        controlPanel.getChildren().addAll(saveButton, restartButton);
+        // Create Load Level dropdown
+        ComboBox<Integer> levelDropdown = new ComboBox<>();
+        levelDropdown.getItems().addAll(1, 2, 3, 4, 5); // Add levels (can be adjusted based on available levels)
+        levelDropdown.setPromptText("Select Level");
+        levelDropdown.setOnAction(e -> {
+            Integer selectedLevel = levelDropdown.getValue();
+            if (selectedLevel != null) {
+                // Reload the selected level
+                MapMatrix newMap = MapMatrix.loadLevel(selectedLevel);
+
+                controller.restartGameWithNewMap(newMap);
+                System.out.println("Loaded Level " + selectedLevel);
+            }
+            root.requestFocus();
+        });
+
+        controlPanel.getChildren().addAll(saveButton, restartButton, levelDropdown);
     }
 
+    /**
+     * Creates a styled button with the specified text and action.
+     */
     private Button createStyledButton(String text, javafx.event.EventHandler<javafx.event.ActionEvent> action) {
         Button button = new Button(text);
         button.setStyle("-fx-background-color: #6B8E23; " +
@@ -105,6 +132,9 @@ public class GamePanel {
         return button;
     }
 
+    /**
+     * Creates a centered game grid for better visibility and alignment.
+     */
     private Pane createCenteredGameGrid() {
         StackPane centeredGridContainer = new StackPane();
         centeredGridContainer.setMaxWidth(400);
@@ -114,6 +144,9 @@ public class GamePanel {
         return centeredGridContainer;
     }
 
+    /**
+     * Sets up key event handling for hero movement.
+     */
     private void setupKeyEvents() {
         root.setOnKeyPressed(event -> {
             switch (event.getCode()) {
@@ -126,6 +159,9 @@ public class GamePanel {
         });
     }
 
+    /**
+     * Returns the root layout for this panel.
+     */
     public StackPane getRoot() {
         return root;
     }
