@@ -4,22 +4,32 @@ import SOKOBAN.controller.GameController;
 import SOKOBAN.model.Direction;
 import SOKOBAN.model.MapMatrix;
 import SOKOBAN.model.User;
+import javafx.animation.FadeTransition;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
-import javafx.scene.control.ComboBox;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.*;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
+import javafx.util.Duration;
 
 import java.io.File;
+import java.util.Optional;
 
 public class GamePanel {
     private final StackPane root; // Root pane to hold background and map
     private final VBox content;  // VBox for buttons and map
     private final HBox controlPanel; // Control panel for buttons
+    private final HBox infoPanel; // Info panel for displaying step counter
     private final GameController controller; // Controller for game logic
     private final GridPane gameGrid; // GridPane for the map
+    private final Label stepCounterLabel; // Step counter label
+    private int steps; // Step counter variable
 
     public GamePanel(Stage stage, User user) {
         root = new StackPane();
@@ -29,14 +39,24 @@ public class GamePanel {
         controlPanel = new HBox(15);
         controlPanel.setAlignment(Pos.CENTER);
 
+        infoPanel = new HBox();
+        infoPanel.setAlignment(Pos.CENTER);
+        infoPanel.setSpacing(10);
+
         gameGrid = new GridPane();
 
         MapMatrix map = loadGameOrLevel(user, 1); // Default level is 1
-        controller = new GameController(gameGrid, map);
+        controller = new GameController(gameGrid, map, this); // Pass `this` for animation callbacks
+
+        // Step counter initialization
+        steps = 0;
+        stepCounterLabel = new Label("Steps: 0");
+        stepCounterLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: white;");
 
         setupControlPanel(stage, user);
         setBackgroundImage();
-        content.getChildren().addAll(controlPanel, createCenteredGameGrid());
+        infoPanel.getChildren().add(stepCounterLabel); // Add step counter to info panel
+        content.getChildren().addAll(infoPanel, controlPanel, createCenteredGameGrid());
 
         root.getChildren().add(content);
 
@@ -69,7 +89,6 @@ public class GamePanel {
      * Loads the game state or initializes a specific level.
      */
     private MapMatrix loadGameOrLevel(User user, int level) {
-
         if (!user.isGuest() && new File(user.getSaveFileName()).exists()) {
             return MapMatrix.loadFromFile(user.getSaveFileName());
         } else {
@@ -78,7 +97,7 @@ public class GamePanel {
     }
 
     /**
-     * Sets up the control panel with Save, Restart, and Load Level buttons.
+     * Sets up the control panel with Save, Restart, Load Level, and Start with Saves buttons.
      */
     private void setupControlPanel(Stage stage, User user) {
         // Create Save button
@@ -94,26 +113,51 @@ public class GamePanel {
         // Create Restart button
         Button restartButton = createStyledButton("Restart", e -> {
             controller.restartGame();
+            resetStepCounter(); // Reset step counter
             root.requestFocus();
         });
 
         // Create Load Level dropdown
-        ComboBox<Integer> levelDropdown = new ComboBox<>();
-        levelDropdown.getItems().addAll(1, 2, 3, 4, 5); // Add levels (can be adjusted based on available levels)
-        levelDropdown.setPromptText("Select Level");
-        levelDropdown.setOnAction(e -> {
-            Integer selectedLevel = levelDropdown.getValue();
-            if (selectedLevel != null) {
-                // Reload the selected level
-                MapMatrix newMap = MapMatrix.loadLevel(selectedLevel);
-
-                controller.restartGameWithNewMap(newMap);
-                System.out.println("Loaded Level " + selectedLevel);
-            }
+        Button loadLevelButton = createStyledButton("Load Level", e -> {
+            TextInputDialog dialog = new TextInputDialog("1");
+            dialog.setTitle("Load Level");
+            dialog.setHeaderText("Enter the level number to load:");
+            dialog.setContentText("Level:");
+            Optional<String> result = dialog.showAndWait();
+            result.ifPresent(level -> {
+                try {
+                    int levelNumber = Integer.parseInt(level);
+                    MapMatrix newMap = MapMatrix.loadLevel(levelNumber);
+                    controller.restartGameWithNewMap(newMap);
+                    resetStepCounter(); // Reset step counter
+                } catch (NumberFormatException ex) {
+                    System.out.println("Invalid level number.");
+                }
+            });
             root.requestFocus();
         });
 
-        controlPanel.getChildren().addAll(saveButton, restartButton, levelDropdown);
+        // Create Start with Saves button
+        Button startWithSavesButton = createStyledButton("Start with Saves", e -> {
+            TextInputDialog dialog = new TextInputDialog("save_file");
+            dialog.setTitle("Load Saved Game");
+            dialog.setHeaderText("Enter the saved filename to load:");
+            dialog.setContentText("Filename:");
+            Optional<String> result = dialog.showAndWait();
+            result.ifPresent(filename -> {
+                File saveFile = new File("src/main/java/SOKOBAN/resources/saves/" + filename + ".txt");
+                if (saveFile.exists()) {
+                    MapMatrix savedMap = MapMatrix.loadFromFile("src/main/java/SOKOBAN/resources/saves/" + filename + ".txt");
+                    controller.restartGameWithNewMap(savedMap);
+                    resetStepCounter(); // Reset step counter
+                } else {
+                    System.out.println("Save file not found.");
+                }
+            });
+            root.requestFocus();
+        });
+
+        controlPanel.getChildren().addAll(saveButton, restartButton, loadLevelButton, startWithSavesButton);
     }
 
     /**
@@ -150,14 +194,65 @@ public class GamePanel {
     private void setupKeyEvents() {
         root.setOnKeyPressed(event -> {
             switch (event.getCode()) {
-                case UP -> controller.moveHero(Direction.UP);
-                case DOWN -> controller.moveHero(Direction.DOWN);
-                case LEFT -> controller.moveHero(Direction.LEFT);
-                case RIGHT -> controller.moveHero(Direction.RIGHT);
+                case UP, DOWN, LEFT, RIGHT -> {
+                    controller.moveHero(Direction.valueOf(event.getCode().name()));
+                    incrementStepCounter(); // Increment step counter when hero moves
+                }
             }
             root.requestFocus();
         });
     }
+
+    /**
+     * Resets the step counter.
+     */
+    private void resetStepCounter() {
+        steps = 0;
+        stepCounterLabel.setText("Steps: 0");
+    }
+
+    /**
+     * Increments the step counter and updates the label.
+     */
+    private void incrementStepCounter() {
+        steps++;
+        stepCounterLabel.setText("Steps: " + steps);
+    }
+
+    /**
+     * Displays a success animation overlay.
+     */
+    public void showSuccessAnimation() {
+        Label successLabel = new Label("Congratulations! You Won!");
+        successLabel.setFont(Font.font("Arial", FontWeight.BOLD, 36));
+        successLabel.setStyle("-fx-text-fill: green;");
+
+        FadeTransition fade = new FadeTransition(Duration.seconds(3), successLabel);
+        fade.setFromValue(1.0);
+        fade.setToValue(0.0);
+        fade.setOnFinished(e -> root.getChildren().remove(successLabel));
+
+        root.getChildren().add(successLabel);
+        fade.play();
+    }
+
+    /**
+     * Displays a fail animation overlay.
+     */
+    public void showFailAnimation() {
+        Label failLabel = new Label("Game Over! A Box is Stuck!");
+        failLabel.setFont(Font.font("Arial", FontWeight.BOLD, 36));
+        failLabel.setStyle("-fx-text-fill: red;");
+
+        FadeTransition fade = new FadeTransition(Duration.seconds(3), failLabel);
+        fade.setFromValue(1.0);
+        fade.setToValue(0.0);
+        fade.setOnFinished(e -> root.getChildren().remove(failLabel));
+
+        root.getChildren().add(failLabel);
+        fade.play();
+    }
+
 
     /**
      * Returns the root layout for this panel.

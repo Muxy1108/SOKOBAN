@@ -1,34 +1,44 @@
 package SOKOBAN.controller;
 
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
-import javafx.scene.paint.Color;
 import SOKOBAN.model.Direction;
 import SOKOBAN.model.MapMatrix;
 import SOKOBAN.view.Box;
+import SOKOBAN.view.GamePanel;
 import SOKOBAN.view.GridComponent;
 import SOKOBAN.view.Hero;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
+import java.io.*;
+import java.util.Stack;
 
 public class GameController {
 
     private final GridPane grid;  // The GridPane for displaying the game
     private final MapMatrix model;  // The underlying game matrix model
+    private final GamePanel gamePanel;  // Reference to the GamePanel for animations
     private Hero hero;  // The hero object representing the player
     private Box[][] boxes;  // 2D array to track boxes' positions
+    private final Stack<int[][]> stateStack; // Stack to track previous states
+
+    // Paths to the images
+    private final Image wallImage = new Image("file:src/main/java/SOKOBAN/resources/images/wall.png");
+    private final Image targetImage = new Image("file:src/main/java/SOKOBAN/resources/images/target.png");
+    private final Image boxImage = new Image("file:src/main/java/SOKOBAN/resources/images/box.png");
+    private final Image heroImage = new Image("file:src/main/java/SOKOBAN/resources/images/hero.png");
+    private final Image emptyImage = new Image("file:src/main/java/SOKOBAN/resources/images/empty.png");
 
     public GridPane getGridPane() {
         return grid;
     }
 
-
-
-    public GameController(GridPane grid, MapMatrix model) {
+    public GameController(GridPane grid, MapMatrix model, GamePanel gamePanel) {
         this.grid = grid;
         this.model = model;
+        this.gamePanel = gamePanel;
         this.boxes = new Box[model.getMatrix().length][model.getMatrix()[0].length]; // Initialize box grid
+        this.stateStack = new Stack<>(); // Initialize the state stack
         initializeGame();
     }
 
@@ -45,69 +55,58 @@ public class GameController {
             }
         }
     }
+
     /**
-     * Updates the grid component without clearing the whole grid.
-     * This is for efficient updates during hero movement or box push.
+     * Saves the current game state to the stack.
      */
-    private void updateGridComponent(int oldRow, int oldCol, int newRow, int newCol) {
-        int[][] matrix = model.getMatrix();
-        GridComponent newCell;
+    private void saveState() {
+        int[][] currentState = model.getMatrix();
+        int[][] copy = new int[currentState.length][currentState[0].length];
 
-        // Update hero position
-        if (matrix[newRow][newCol] == 5) {
-            newCell = new GridComponent(40, Color.BLUE);
-            grid.add(newCell, newCol, newRow);
+        // Deep copy the current state
+        for (int i = 0; i < currentState.length; i++) {
+            System.arraycopy(currentState[i], 0, copy[i], 0, currentState[i].length);
         }
 
-        // Update box position
-        if (matrix[newRow][newCol] == 3) {
-            newCell = new GridComponent(40, Color.BROWN);
-            grid.add(newCell, newCol, newRow);
-        }
-
-        // Update old position (might be empty, wall, or target)
-        newCell = new GridComponent(40, getColorForCell(matrix[oldRow][oldCol]));
-        grid.add(newCell, oldCol, oldRow);  // Revert the old cell to its appropriate color
+        stateStack.push(copy);
     }
-    /**
-     * Returns the color based on the matrix cell type.
-     */
-    private Color getColorForCell(int cellType) {
-        switch (cellType) {
-            case 1: return Color.DARKGRAY;  // Wall
-            case 4: return Color.YELLOW;  // Target
-            case 2: return Color.WHITE;  // Empty space
-            default: return Color.WHITE;
+    public void returnToLastStep() {
+        if (!stateStack.isEmpty()) {
+            int[][] previousState = stateStack.pop(); // Get the last state
+            model.setMatrix(previousState); // Update the model with the previous state
+            initializeGame(); // Reinitialize the grid
+        } else {
+            System.out.println("No previous step to return to!");
         }
     }
-
-
     /**
      * Creates a GridComponent for the specified cell type and adds it to the grid.
      */
     private GridComponent createGridCell(int cellType, int row, int col) {
-        GridComponent cell;
+        ImageView imageView;
         switch (cellType) {
             case 1:  // Wall
-                cell = new GridComponent(40, Color.DARKGRAY);
+                imageView = new ImageView(wallImage);
                 break;
             case 4:  // Target
-                cell = new GridComponent(40, Color.YELLOW);
+                imageView = new ImageView(targetImage);
                 break;
             case 3:  // Box
-                cell = new GridComponent(40, Color.BROWN);
+                imageView = new ImageView(boxImage);
                 boxes[row][col] = new Box(row, col);  // Store Box object
                 break;
             case 5:  // Hero
-                cell = new GridComponent(40, Color.BLUE);
+                imageView = new ImageView(heroImage);
                 hero = new Hero(row, col);  // Initialize Hero object
                 break;
             case 2:  // Empty space
             default:
-                cell = new GridComponent(40, Color.WHITE);
+                imageView = new ImageView(emptyImage);
                 break;
         }
-        return cell;
+        imageView.setFitWidth(40);  // Resize the image
+        imageView.setFitHeight(40);
+        return new GridComponent(40, imageView);
     }
 
     /**
@@ -136,9 +135,10 @@ public class GameController {
 
         // Check success or fail conditions
         if (isSuccess(matrix)) {
-            System.out.println("Congratulations! You have completed the puzzle!");
+            gamePanel.showSuccessAnimation(); // Trigger success animation
+            saveState();
         } else if (isFail(matrix)) {
-            System.out.println("Game over! A box is stuck and the puzzle is unsolvable.");
+            gamePanel.showFailAnimation(); // Trigger fail animation
         }
     }
 
@@ -156,25 +156,20 @@ public class GameController {
             // Clear hero's old position
             matrix[currentRow][currentCol] = model.getInitialMatrix()[currentRow][currentCol] == 4 ? 4 : 2;
 
-            printMapMatrix();
-
             hero.move(targetRow, targetCol);  // Update hero position
 
             // Update grid efficiently
-            updateGridComponent(targetRow, targetCol, boxTargetRow, boxTargetCol);  // Update box
-            updateGridComponent(currentRow, currentCol, targetRow, targetCol);  // Update hero
+            initializeGame(); // Refresh the game grid
         }
     }
 
     private void moveHeroToEmptyOrTarget(int[][] matrix, int currentRow, int currentCol, int targetRow, int targetCol) {
         matrix[currentRow][currentCol] = model.getInitialMatrix()[currentRow][currentCol] == 4 ? 4 : 2;
-        printMapMatrix();
-        printInitialMapMatrix();
         matrix[targetRow][targetCol] = 5;  // Set new hero position to blue
         hero.move(targetRow, targetCol);  // Update hero's position
-
+        saveState();
         // Update grid efficiently without clearing the entire grid
-        updateGridComponent(currentRow, currentCol, targetRow, targetCol);  // Update hero's new position
+        initializeGame(); // Refresh the game grid
     }
 
     /**
@@ -192,7 +187,7 @@ public class GameController {
         for (int row = 0; row < matrix.length; row++) {
             for (int col = 0; col < matrix[row].length; col++) {
                 if (matrix[row][col] == 4) {
-                    return false;  // A box is not on a target
+                    return false;  // A target is empty
                 }
             }
         }
@@ -219,6 +214,7 @@ public class GameController {
      * Checks if a box can move to any adjacent empty space or target.
      */
     private boolean canBoxMove(int row, int col, int[][] matrix) {
+        //need to be modified
         for (Direction direction : Direction.values()) {
             int newRow = row + direction.getRowOffset();
             int newCol = col + direction.getColOffset();
@@ -229,69 +225,38 @@ public class GameController {
         return false;  // Box cannot move
     }
 
-
-    /**
-     * Restarts the game by reinitializing the grid.
-     */
-    public void printInitialMapMatrix() {
-        int[][] matrix = model.getInitialMatrix();  // Get the game matrix
-        System.out.println("Initial Mapmatrix:");
-        // Iterate through each row of the matrix
-        for (int row = 0; row < matrix.length; row++) {
-            // Iterate through each column in the current row
-            for (int col = 0; col < matrix[row].length; col++) {
-                // Print the matrix element, followed by a space
-                System.out.print(matrix[row][col] + " ");
-            }
-            // After each row, print a new line for the next row
-            System.out.println();
-        }
-        System.out.println();
-    }
-    public void printMapMatrix() {
-        int[][] matrix = model.getMatrix();  // Get the game matrix
-        System.out.println("Map matrix:");
-        // Iterate through each row of the matrix
-        for (int row = 0; row < matrix.length; row++) {
-            // Iterate through each column in the current row
-            for (int col = 0; col < matrix[row].length; col++) {
-                // Print the matrix element, followed by a space
-                System.out.print(matrix[row][col] + " ");
-            }
-            // After each row, print a new line for the next row
-            System.out.println();
-        }
-        System.out.println();
-    }
-
-
-    /**
-     * Saves the current game state to a file.
-     *
-     * @param filename The name of the file to save to.
-     */
-    public void saveGame(String filename) {
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream("src/main/java/SOKOBAN/resources/saves/" + filename + ".dat"))) {
-            out.writeObject(model.getMatrix());  // Save the game matrix
-            System.out.println("Game saved to " + filename);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
     /**
      * Restarts the game by reinitializing the grid.
      */
     public void restartGame() {
-        model.loadLevel(model.loadNum);
-        //model.setMatrix(model.getInitialMatrix()); // Reset the model to its initial state
+        model.setMatrix(model.getInitialMatrix()); // Reset the model to its initial state
         initializeGame();
         System.out.println("Game restarted.");
     }
-    public void restartGameWithNewMap(MapMatrix newMap) {
 
+    /**
+     * Restarts the game with a new map.
+     */
+    public void restartGameWithNewMap(MapMatrix newMap) {
         model.setMatrix(newMap.getMatrix());
-        model.setInitialMatrix(newMap.getMatrix()); // Replace the model's matrix with the new level's matrix
         initializeGame(); // Reinitialize the game grid
     }
 
+    /**
+     * Saves the current game state to a file.
+     */
+    public void saveGame(String filename) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/java/SOKOBAN/resources/saves/" + filename + ".txt"))) {
+            int[][] matrix = model.getMatrix();
+            for (int row = 0; row < matrix.length; row++) {
+                for (int col = 0; col < matrix[row].length; col++) {
+                    writer.write(matrix[row][col] + " "); // Write each cell separated by a space
+                }
+                writer.newLine(); // Move to the next line after each row
+            }
+            System.out.println("Game saved to " + filename + ".txt");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
