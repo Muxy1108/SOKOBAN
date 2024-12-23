@@ -155,8 +155,10 @@ public class GameController {
 
             // Clear hero's old position
             matrix[currentRow][currentCol] = model.getInitialMatrix()[currentRow][currentCol] == 4 ? 4 : 2;
+            hero.move(targetRow, targetCol);// Update hero position
 
-            hero.move(targetRow, targetCol);  // Update hero position
+            printMatrix();
+            printInitialMapMatrix();
 
             // Update grid efficiently
             initializeGame(); // Refresh the game grid
@@ -167,6 +169,8 @@ public class GameController {
         matrix[currentRow][currentCol] = model.getInitialMatrix()[currentRow][currentCol] == 4 ? 4 : 2;
         matrix[targetRow][targetCol] = 5;  // Set new hero position to blue
         hero.move(targetRow, targetCol);  // Update hero's position
+        printMatrix();
+        printInitialMapMatrix();
         saveState();
         // Update grid efficiently without clearing the entire grid
         initializeGame(); // Refresh the game grid
@@ -198,16 +202,29 @@ public class GameController {
      * Determines if the game has failed (a box is stuck and the game is unsolvable).
      */
     private boolean isFail(int[][] matrix) {
+        int cannotmovecounter = 0;
+        int boxcounter = 0;
         for (int row = 0; row < matrix.length; row++) {
             for (int col = 0; col < matrix[row].length; col++) {
-                if (matrix[row][col] == 3 && !canBoxMove(row, col, matrix)) {
-                    if (model.getInitialMatrix()[row][col] != 4) {
-                        return true;  // A box is stuck and not on a target
+                if (matrix[row][col] == 3) {
+                    boxcounter++;
+                    if(!canBoxMove(row, col, matrix)){
+                        System.out.println("row = " + row + ", col = " + col);
+                        cannotmovecounter++;
+                        /*if (model.getInitialMatrix()[row][col] != 4) {
+                            /*System.out.println("Initial: " + "row = " + row + ", col = " + col + " is " + model.getInitialMatrix()[row][col]);
+                            printMatrix();
+                            printInitialMapMatrix();*/
+                            //System.out.println("isFail");
+
+                        // A box is stuck and not on a target
+                        //}
                     }
                 }
             }
         }
-        return false;  // No boxes are stuck
+        if(cannotmovecounter == boxcounter) return true;
+        else return false;  // No boxes are stuck
     }
 
     /**
@@ -215,14 +232,28 @@ public class GameController {
      */
     private boolean canBoxMove(int row, int col, int[][] matrix) {
         //need to be modified
-        for (Direction direction : Direction.values()) {
+        System.out.println("matrix row + 1 : " + matrix[row + 1][col]);
+        System.out.println("matrix row - 1 : " + matrix[row - 1][col]);
+        if(matrix[row + 1][col] == 2 || matrix[row + 1][col] == 5 || matrix[row + 1][col] == 4 ){
+            if(matrix[row - 1][col] == 2 || matrix[row - 1][col] == 5 || matrix[row - 1][col] == 4 ){
+                System.out.println("canBoxMove");
+                return true;
+            }
+        }
+        if(matrix[row][col + 1] == 2 || matrix[row][col + 1] == 5 || matrix[row][col + 1] == 4 ){
+            if(matrix[row][col - 1] == 2 || matrix[row][col - 1] == 5 || matrix[row][col - 1] == 4 ){
+                return true;
+            }
+        }
+        return false;
+        /*for (Direction direction : Direction.values()) {
             int newRow = row + direction.getRowOffset();
             int newCol = col + direction.getColOffset();
             if (isValidMove(newRow, newCol, matrix) && (matrix[newRow][newCol] == 2 || matrix[newRow][newCol] == 4)) {
                 return true;  // Box can move
             }
-        }
-        return false;  // Box cannot move
+        }*/
+
     }
 
     /**
@@ -239,6 +270,7 @@ public class GameController {
      */
     public void restartGameWithNewMap(MapMatrix newMap) {
         model.setMatrix(newMap.getMatrix());
+        model.setInitialMatrix(newMap.getInitialMatrix());
         initializeGame(); // Reinitialize the game grid
     }
 
@@ -259,4 +291,33 @@ public class GameController {
             e.printStackTrace();
         }
     }
+    public void printMatrix() {
+        int[][] matrix = model.getMatrix();  // Get the game matrix
+        System.out.println("Mapmatrix : ");
+        // Iterate through each row of the matrix
+        for (int row = 0; row < matrix.length; row++) {
+            // Iterate through each column in the current row
+            for (int col = 0; col < matrix[row].length; col++) {
+                // Print the matrix element, followed by a space
+                System.out.print(matrix[row][col] + " ");
+            }
+            // After each row, print a new line for the next row
+            System.out.println();
+        }
+    }
+    public void printInitialMapMatrix() {
+        int[][] matrix = model.getInitialMatrix();  // Get the game matrix
+        System.out.println("Initial Matrix : ");
+        // Iterate through each row of the matrix
+        for (int row = 0; row < matrix.length; row++) {
+            // Iterate through each column in the current row
+            for (int col = 0; col < matrix[row].length; col++) {
+                // Print the matrix element, followed by a space
+                System.out.print(matrix[row][col] + " ");
+            }
+            // After each row, print a new line for the next row
+            System.out.println();
+        }
+    }
+
 }

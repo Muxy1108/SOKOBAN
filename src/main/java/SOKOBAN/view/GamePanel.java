@@ -17,7 +17,13 @@ import javafx.scene.text.Font;
 import javafx.scene.text.FontWeight;
 import javafx.stage.Stage;
 import javafx.util.Duration;
+/*import javafx.scene.media;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;*/
 
+
+
+import javax.print.attribute.standard.Media;
 import java.io.File;
 import java.util.Optional;
 
@@ -30,6 +36,7 @@ public class GamePanel {
     private final GridPane gameGrid; // GridPane for the map
     private final Label stepCounterLabel; // Step counter label
     private int steps; // Step counter variable
+    private Sound sound;//private MediaPlayer musicPlayer;
 
     public GamePanel(Stage stage, User user) {
         root = new StackPane();
@@ -68,7 +75,40 @@ public class GamePanel {
         scene.setOnMouseClicked(event -> root.requestFocus()); // Regain focus on mouse click
 
         stage.setScene(scene);
+
+        sound = new Sound();
+        sound.setMusic("nor.mid"); // Set the gameplay music file
+        sound.loadSound(); // Start playing the music
+
+        //playMusic("src/main/java/SOKOBAN/resources/audio/gameplay.mp3");
     }
+
+    /**
+     * Plays a music file.
+     *
+     * @param filePath The path to the music file.
+     */
+    /*private void playMusic(String filePath) {
+        if (musicPlayer != null) {
+            musicPlayer.stop(); // Stop any existing music
+        }
+
+        Media media = new Media(new File(filePath).toURI().toString());
+        musicPlayer = new MediaPlayer(media);
+        musicPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Loop the music
+        musicPlayer.play();
+
+    }*/
+
+    /**
+     * Stops the current music.
+     */
+    /*private void stopMusic() {
+        if (musicPlayer != null) {
+            musicPlayer.stop();
+        }
+    }
+    */
 
     /**
      * Adds a background image to the root layout.
@@ -128,6 +168,7 @@ public class GamePanel {
                 try {
                     int levelNumber = Integer.parseInt(level);
                     MapMatrix newMap = MapMatrix.loadLevel(levelNumber);
+
                     controller.restartGameWithNewMap(newMap);
                     resetStepCounter(); // Reset step counter
                 } catch (NumberFormatException ex) {
@@ -156,8 +197,16 @@ public class GamePanel {
             });
             root.requestFocus();
         });
+        Button returnButton = createStyledButton("Undo Step", e -> {
+            controller.returnToLastStep(); // Call the returnToLastStep method
+            steps--; // Decrement step counter
+            if (steps < 0) steps = 0; // Ensure step count doesn't go negative
+            stepCounterLabel.setText("Steps: " + steps);
+            root.requestFocus();
+        });
 
-        controlPanel.getChildren().addAll(saveButton, restartButton, loadLevelButton, startWithSavesButton);
+
+        controlPanel.getChildren().addAll(saveButton, restartButton, loadLevelButton, startWithSavesButton,returnButton);
     }
 
     /**
@@ -223,6 +272,9 @@ public class GamePanel {
      * Displays a success animation overlay.
      */
     public void showSuccessAnimation() {
+        sound.mystop();
+        sound.setMusic("success.mid"); // Set success music file
+        sound.loadSound();
         Label successLabel = new Label("Congratulations! You Won!");
         successLabel.setFont(Font.font("Arial", FontWeight.BOLD, 36));
         successLabel.setStyle("-fx-text-fill: green;");
@@ -240,6 +292,11 @@ public class GamePanel {
      * Displays a fail animation overlay.
      */
     public void showFailAnimation() {
+
+        sound.mystop();
+        sound.setMusic("fail.mid"); // Set fail music file
+        sound.loadSound();
+
         Label failLabel = new Label("Game Over! A Box is Stuck!");
         failLabel.setFont(Font.font("Arial", FontWeight.BOLD, 36));
         failLabel.setStyle("-fx-text-fill: red;");

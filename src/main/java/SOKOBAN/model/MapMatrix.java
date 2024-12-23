@@ -7,7 +7,7 @@ import SOKOBAN.controller.GameController;
 //2空格
 //3箱子
 //4指定地点
-//hero
+//5hero
 public class MapMatrix {
     private int[][] matrix;
     private int[][] initialMatrix;
@@ -26,6 +26,7 @@ public class MapMatrix {
     public static MapMatrix loadLevel(int level) {
         loadNum = level;
         MapMatrix mapMatrix = new MapMatrix();
+
         try (BufferedReader reader = new BufferedReader(new FileReader("src/main/java/SOKOBAN/resources/maps/level" + level + ".txt"))) {
             String line;
             int rows = 0;
