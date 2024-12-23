@@ -35,16 +35,17 @@ public class GamePanel {
     private final GameController controller; // Controller for game logic
     private final GridPane gameGrid; // GridPane for the map
     private final Label stepCounterLabel; // Step counter label
-    private int steps; // Step counter variable
-    private Sound sound;//private MediaPlayer musicPlayer;
+    private Sound sound; // Sound object
+    public static int steps; // Step counter variable
+    public static int savedsteps; // Saved steps for resetting
 
     public GamePanel(Stage stage, User user) {
         root = new StackPane();
         content = new VBox(20); // Vertical space between elements
         content.setAlignment(Pos.CENTER);
 
-        controlPanel = new HBox(15);
-        controlPanel.setAlignment(Pos.CENTER);
+        controlPanel = new HBox(15); // Default spacing for control panel
+        controlPanel.setAlignment(Pos.CENTER_LEFT); // Align the buttons on the left side
 
         infoPanel = new HBox();
         infoPanel.setAlignment(Pos.CENTER);
@@ -68,7 +69,7 @@ public class GamePanel {
         root.getChildren().add(content);
 
         // Create the scene and set up key event handling
-        Scene scene = new Scene(root, 800, 600);
+        Scene scene = new Scene(root, 1000, 800);
         setupKeyEvents(); // Enable keyboard controls
         root.requestFocus(); // Request focus for root initially
 
@@ -79,66 +80,8 @@ public class GamePanel {
         sound = new Sound();
         sound.setMusic("nor.mid"); // Set the gameplay music file
         sound.loadSound(); // Start playing the music
-
-        //playMusic("src/main/java/SOKOBAN/resources/audio/gameplay.mp3");
     }
 
-    /**
-     * Plays a music file.
-     *
-     * @param filePath The path to the music file.
-     */
-    /*private void playMusic(String filePath) {
-        if (musicPlayer != null) {
-            musicPlayer.stop(); // Stop any existing music
-        }
-
-        Media media = new Media(new File(filePath).toURI().toString());
-        musicPlayer = new MediaPlayer(media);
-        musicPlayer.setCycleCount(MediaPlayer.INDEFINITE); // Loop the music
-        musicPlayer.play();
-
-    }*/
-
-    /**
-     * Stops the current music.
-     */
-    /*private void stopMusic() {
-        if (musicPlayer != null) {
-            musicPlayer.stop();
-        }
-    }
-    */
-
-    /**
-     * Adds a background image to the root layout.
-     */
-    private void setBackgroundImage() {
-        Image backgroundImage = new Image("file:src/main/java/SOKOBAN/resources/images/game_background.png");
-        BackgroundImage bgImage = new BackgroundImage(
-                backgroundImage,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundRepeat.NO_REPEAT,
-                BackgroundPosition.CENTER,
-                new BackgroundSize(800, 600, false, false, false, false)
-        );
-        root.setBackground(new Background(bgImage));
-    }
-
-    /**
-     * Loads the game state or initializes a specific level.
-     */
-    private MapMatrix loadGameOrLevel(User user, int level) {
-        if (!user.isGuest() && new File(user.getSaveFileName()).exists()) {
-            return MapMatrix.loadFromFile(user.getSaveFileName());
-        } else {
-            return MapMatrix.loadLevel(level);
-        }
-    }
-
-    /**
-     * Sets up the control panel with Save, Restart, Load Level, and Start with Saves buttons.
-     */
     private void setupControlPanel(Stage stage, User user) {
         // Create Save button
         Button saveButton = createStyledButton("Save", e -> {
@@ -197,6 +140,8 @@ public class GamePanel {
             });
             root.requestFocus();
         });
+
+        // Create Undo button
         Button returnButton = createStyledButton("Undo Step", e -> {
             controller.returnToLastStep(); // Call the returnToLastStep method
             steps--; // Decrement step counter
@@ -205,69 +150,54 @@ public class GamePanel {
             root.requestFocus();
         });
 
+        // Directional buttons (Up, Down, Left, Right)
+        Button upButton = createStyledButton("Up", e -> {
+            controller.moveHero(Direction.UP);
+            incrementStepCounter();
+        });
 
-        controlPanel.getChildren().addAll(saveButton, restartButton, loadLevelButton, startWithSavesButton,returnButton);
+        Button downButton = createStyledButton("Down", e -> {
+            controller.moveHero(Direction.DOWN);
+            incrementStepCounter();
+        });
+
+        Button leftButton = createStyledButton("Left", e -> {
+            controller.moveHero(Direction.LEFT);
+            incrementStepCounter();
+        });
+
+        Button rightButton = createStyledButton("Right", e -> {
+            controller.moveHero(Direction.RIGHT);
+            incrementStepCounter();
+        });
+
+        // Create VBox to hold the directional buttons
+        VBox directionalButtonsContainer = new VBox(20); // Vertical container with spacing between buttons
+        directionalButtonsContainer.setAlignment(Pos.CENTER); // Center the buttons vertically
+        directionalButtonsContainer.getChildren().addAll(upButton, leftButton, downButton, rightButton); // Add buttons
+
+        // Create HBox to position the control buttons and the directional buttons aside
+        HBox buttonsContainer = new HBox(30); // Horizontal container with spacing between buttons
+        buttonsContainer.setAlignment(Pos.CENTER_LEFT); // Align the control buttons to the left
+        buttonsContainer.getChildren().addAll(saveButton, restartButton, loadLevelButton, startWithSavesButton, returnButton); // Add control buttons
+        buttonsContainer.getChildren().add(directionalButtonsContainer); // Add the directional buttons on the right side
+
+        // Add the combined button layout to the control panel
+        controlPanel.getChildren().add(buttonsContainer);
     }
 
-    /**
-     * Creates a styled button with the specified text and action.
-     */
     private Button createStyledButton(String text, javafx.event.EventHandler<javafx.event.ActionEvent> action) {
         Button button = new Button(text);
         button.setStyle("-fx-background-color: #6B8E23; " +
                 "-fx-text-fill: white; " +
-                "-fx-font-size: 16px; " +
-                "-fx-padding: 10 20; " +
+                "-fx-font-size: 20px; " +  // Make buttons larger
+                "-fx-padding: 15 25; " +   // Increase padding for bigger buttons
                 "-fx-background-radius: 10;");
         button.setOnAction(action);
-        button.setOnMouseEntered(e -> button.setStyle("-fx-background-color: #98FB98; -fx-text-fill: black; -fx-font-size: 16px; -fx-background-radius: 10;"));
-        button.setOnMouseExited(e -> button.setStyle("-fx-background-color: #6B8E23; -fx-text-fill: white; -fx-font-size: 16px; -fx-background-radius: 10;"));
+        button.setOnMouseEntered(e -> button.setStyle("-fx-background-color: #98FB98; -fx-text-fill: black; -fx-font-size: 20px; -fx-background-radius: 10;"));
+        button.setOnMouseExited(e -> button.setStyle("-fx-background-color: #6B8E23; -fx-text-fill: white; -fx-font-size: 20px; -fx-background-radius: 10;"));
         return button;
     }
-
-    /**
-     * Creates a centered game grid for better visibility and alignment.
-     */
-    private Pane createCenteredGameGrid() {
-        StackPane centeredGridContainer = new StackPane();
-        centeredGridContainer.setMaxWidth(400);
-        centeredGridContainer.setMaxHeight(400);
-        centeredGridContainer.setAlignment(Pos.CENTER);
-        centeredGridContainer.getChildren().add(gameGrid);
-        return centeredGridContainer;
-    }
-
-    /**
-     * Sets up key event handling for hero movement.
-     */
-    private void setupKeyEvents() {
-        root.setOnKeyPressed(event -> {
-            switch (event.getCode()) {
-                case UP, DOWN, LEFT, RIGHT -> {
-                    controller.moveHero(Direction.valueOf(event.getCode().name()));
-                    incrementStepCounter(); // Increment step counter when hero moves
-                }
-            }
-            root.requestFocus();
-        });
-    }
-
-    /**
-     * Resets the step counter.
-     */
-    private void resetStepCounter() {
-        steps = 0;
-        stepCounterLabel.setText("Steps: 0");
-    }
-
-    /**
-     * Increments the step counter and updates the label.
-     */
-    private void incrementStepCounter() {
-        steps++;
-        stepCounterLabel.setText("Steps: " + steps);
-    }
-
     /**
      * Displays a success animation overlay.
      */
@@ -310,11 +240,63 @@ public class GamePanel {
         fade.play();
     }
 
+    private void setBackgroundImage() {
+        Image backgroundImage = new Image("file:src/main/java/SOKOBAN/resources/images/game_background.png");
+        BackgroundImage bgImage = new BackgroundImage(
+                backgroundImage,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundRepeat.NO_REPEAT,
+                BackgroundPosition.CENTER,
+                new BackgroundSize(1000, 800, false, false, false, false)
+        );
+        root.setBackground(new Background(bgImage));
+    }
 
+    private MapMatrix loadGameOrLevel(User user, int level) {
+        if (!user.isGuest() && new File(user.getSaveFileName()).exists()) {
+            return MapMatrix.loadFromFile(user.getSaveFileName());
+        } else {
+            return MapMatrix.loadLevel(level);
+        }
+    }
+
+    private void setupKeyEvents() {
+        root.setOnKeyPressed(event -> {
+            switch (event.getCode()) {
+                case UP, DOWN, LEFT, RIGHT -> {
+                    controller.moveHero(Direction.valueOf(event.getCode().name()));
+                    incrementStepCounter(); // Increment step counter when hero moves
+                }
+            }
+            root.requestFocus();
+        });
+    }
     /**
-     * Returns the root layout for this panel.
+     * Creates a centered game grid for better visibility and alignment.
      */
+    private Pane createCenteredGameGrid() {
+        // Create a StackPane to center the game grid within the panel
+        StackPane centeredGridContainer = new StackPane();
+        centeredGridContainer.setMaxWidth(500);  // Max width for grid container
+        centeredGridContainer.setMaxHeight(500); // Max height for grid container
+        centeredGridContainer.setAlignment(Pos.CENTER); // Center the grid in the container
+        centeredGridContainer.getChildren().add(gameGrid); // Add the game grid to the container
+
+        return centeredGridContainer;
+    }
+
+    private void resetStepCounter() {
+        steps = savedsteps;
+        stepCounterLabel.setText("Steps: " + steps);
+    }
+
+    private void incrementStepCounter() {
+        steps++;
+        stepCounterLabel.setText("Steps: " + steps);
+    }
+
     public StackPane getRoot() {
         return root;
     }
 }
+

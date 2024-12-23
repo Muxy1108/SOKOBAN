@@ -6,8 +6,8 @@ import javax.sound.midi.Sequence;
 import javax.sound.midi.Sequencer;
 
 class Sound {
-    String path = new String("musics\\");
-    String file = new String("nor.mid");
+    String path = new String("src/main/java/SOKOBAN/resources/musics/");
+    String file = new String();
     Sequence seq;
     Sequencer midi;
     boolean sign;

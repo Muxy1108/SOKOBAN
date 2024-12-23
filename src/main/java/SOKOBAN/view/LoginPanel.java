@@ -24,12 +24,12 @@ public class LoginPanel {
 
         // Set the background image
         ImageView background = new ImageView(new Image("file:src/main/java/SOKOBAN/resources/images/login_background.png"));
-        background.setFitWidth(800);
-        background.setFitHeight(600);
+        background.setFitWidth(1000);
+        background.setFitHeight(800);
         background.setPreserveRatio(true);
 
         // Main container for login UI elements
-        VBox content = new VBox(15);
+        VBox content = new VBox(30);
         content.setAlignment(Pos.CENTER);
 
         // Custom font (ensure the font file is available in your resources/fonts folder)

@@ -109,11 +109,11 @@ public class GameController {
         return new GridComponent(40, imageView);
     }
 
-    /**
-     * Handles hero movement in the specified direction.
-     */
     public void moveHero(Direction direction) {
-        if (hero == null) return;  // If there's no hero, do nothing
+        if (hero == null) return; // If there's no hero, do nothing
+
+        // Save the current state to the stack
+        saveState();
 
         int currentRow = hero.getRow();
         int currentCol = hero.getCol();
@@ -136,7 +136,6 @@ public class GameController {
         // Check success or fail conditions
         if (isSuccess(matrix)) {
             gamePanel.showSuccessAnimation(); // Trigger success animation
-            saveState();
         } else if (isFail(matrix)) {
             gamePanel.showFailAnimation(); // Trigger fail animation
         }
@@ -157,8 +156,8 @@ public class GameController {
             matrix[currentRow][currentCol] = model.getInitialMatrix()[currentRow][currentCol] == 4 ? 4 : 2;
             hero.move(targetRow, targetCol);// Update hero position
 
-            printMatrix();
-            printInitialMapMatrix();
+            //printMatrix();
+            //printInitialMapMatrix();
 
             // Update grid efficiently
             initializeGame(); // Refresh the game grid
@@ -169,8 +168,8 @@ public class GameController {
         matrix[currentRow][currentCol] = model.getInitialMatrix()[currentRow][currentCol] == 4 ? 4 : 2;
         matrix[targetRow][targetCol] = 5;  // Set new hero position to blue
         hero.move(targetRow, targetCol);  // Update hero's position
-        printMatrix();
-        printInitialMapMatrix();
+        //printMatrix();
+        //printInitialMapMatrix();
         saveState();
         // Update grid efficiently without clearing the entire grid
         initializeGame(); // Refresh the game grid
@@ -209,7 +208,7 @@ public class GameController {
                 if (matrix[row][col] == 3) {
                     boxcounter++;
                     if(!canBoxMove(row, col, matrix)){
-                        System.out.println("row = " + row + ", col = " + col);
+                        //System.out.println("row = " + row + ", col = " + col);
                         cannotmovecounter++;
                         /*if (model.getInitialMatrix()[row][col] != 4) {
                             /*System.out.println("Initial: " + "row = " + row + ", col = " + col + " is " + model.getInitialMatrix()[row][col]);
@@ -232,11 +231,11 @@ public class GameController {
      */
     private boolean canBoxMove(int row, int col, int[][] matrix) {
         //need to be modified
-        System.out.println("matrix row + 1 : " + matrix[row + 1][col]);
-        System.out.println("matrix row - 1 : " + matrix[row - 1][col]);
+        //System.out.println("matrix row + 1 : " + matrix[row + 1][col]);
+        //System.out.println("matrix row - 1 : " + matrix[row - 1][col]);
         if(matrix[row + 1][col] == 2 || matrix[row + 1][col] == 5 || matrix[row + 1][col] == 4 ){
             if(matrix[row - 1][col] == 2 || matrix[row - 1][col] == 5 || matrix[row - 1][col] == 4 ){
-                System.out.println("canBoxMove");
+                //System.out.println("canBoxMove");
                 return true;
             }
         }
@@ -274,23 +273,53 @@ public class GameController {
         initializeGame(); // Reinitialize the game grid
     }
 
+
     /**
-     * Saves the current game state to a file.
+     * Saves the current game state to a `.txt` file.
+     *
+     * @param filename The name of the file to save to.
      */
+
     public void saveGame(String filename) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/java/SOKOBAN/resources/saves/" + filename + ".txt"))) {
-            int[][] matrix = model.getMatrix();
+            int[][] matrix = model.getMatrix(); // Get the current game matrix
+            writer.write("Steps: " + GamePanel.steps);
+            writer.newLine();
+            // Write each row of the matrix to the file
             for (int row = 0; row < matrix.length; row++) {
+                StringBuilder rowString = new StringBuilder(); // Use StringBuilder to build the row
                 for (int col = 0; col < matrix[row].length; col++) {
-                    writer.write(matrix[row][col] + " "); // Write each cell separated by a space
+                    rowString.append(matrix[row][col]); // Append each number with a space
                 }
-                writer.newLine(); // Move to the next line after each row
+                writer.write(rowString.toString().trim()); // Write the row and remove trailing space
+                writer.newLine(); // Move to the next line
             }
+
             System.out.println("Game saved to " + filename + ".txt");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+    /*public void saveGame(String filename) {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/java/SOKOBAN/resources/saves/" + filename + ".txt"))) {
+            int[][] matrix = model.getMatrix(); // Get the current game matrix
+
+            // Write the matrix to the file
+            for (int row = 0; row < matrix.length; row++) {
+                for (int col = 0; col < matrix[row].length; col++) {
+                    writer.write(matrix[row][col]); // Write each cell value
+                }
+                writer.newLine(); // Move to the next line after each row
+            }
+
+            System.out.println("Game saved to " + filename + ".txt");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }*/
+
+
     public void printMatrix() {
         int[][] matrix = model.getMatrix();  // Get the game matrix
         System.out.println("Mapmatrix : ");

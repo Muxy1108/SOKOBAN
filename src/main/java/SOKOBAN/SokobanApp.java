@@ -10,7 +10,7 @@ public class SokobanApp extends Application {
     public void start(Stage primaryStage) {
         LoginPanel loginPanel = new LoginPanel(primaryStage);
 
-        Scene scene = new Scene(loginPanel.getRoot(), 800, 600);
+        Scene scene = new Scene(loginPanel.getRoot(), 1000, 800);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Sokoban Game");
         primaryStage.show();
