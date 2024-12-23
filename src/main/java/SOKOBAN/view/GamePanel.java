@@ -174,7 +174,7 @@ public class GamePanel {
         // Create VBox to hold the directional buttons
         VBox directionalButtonsContainer = new VBox(20); // Vertical container with spacing between buttons
         directionalButtonsContainer.setAlignment(Pos.CENTER); // Center the buttons vertically
-        directionalButtonsContainer.getChildren().addAll(upButton, leftButton, downButton, rightButton); // Add buttons
+        directionalButtonsContainer.getChildren().addAll(upButton, downButton,  leftButton, rightButton); // Add buttons
 
         // Create HBox to position the control buttons and the directional buttons aside
         HBox buttonsContainer = new HBox(30); // Horizontal container with spacing between buttons
