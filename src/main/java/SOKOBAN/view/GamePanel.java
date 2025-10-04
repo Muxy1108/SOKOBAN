@@ -54,12 +54,13 @@ public class GamePanel {
         gameGrid = new GridPane();
 
         MapMatrix map = loadGameOrLevel(user, 1); // Default level is 1
+
         controller = new GameController(gameGrid, map, this); // Pass `this` for animation callbacks
 
         // Step counter initialization
         steps = 0;
         stepCounterLabel = new Label("Steps: 0");
-        stepCounterLabel.setStyle("-fx-font-size: 16px; -fx-text-fill: white;");
+        stepCounterLabel.setStyle("-fx-font-size: 24px; -fx-text-fill: #2d12a3;");
 
         setupControlPanel(stage, user);
         setBackgroundImage();

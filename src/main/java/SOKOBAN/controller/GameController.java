@@ -285,21 +285,28 @@ public class GameController {
             int[][] matrix = model.getMatrix(); // Get the current game matrix
             writer.write("Steps: " + GamePanel.steps);
             writer.newLine();
+            //StringBuilder dataToHash = new StringBuilder("Steps: " + GamePanel.steps + "\n");
+
             // Write each row of the matrix to the file
             for (int row = 0; row < matrix.length; row++) {
                 StringBuilder rowString = new StringBuilder(); // Use StringBuilder to build the row
                 for (int col = 0; col < matrix[row].length; col++) {
                     rowString.append(matrix[row][col]); // Append each number with a space
                 }
+                String rowData = rowString.toString().trim();
+
                 writer.write(rowString.toString().trim()); // Write the row and remove trailing space
                 writer.newLine(); // Move to the next line
             }
+
 
             System.out.println("Game saved to " + filename + ".txt");
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
+
+
 
     /*public void saveGame(String filename) {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter("src/main/java/SOKOBAN/resources/saves/" + filename + ".txt"))) {

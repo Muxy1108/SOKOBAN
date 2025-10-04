@@ -86,6 +86,7 @@ public class MapMatrix {
             int rows = 0;
             int cols = 0;
 
+
             while ((line = reader.readLine()) != null) {
                 if (line.startsWith("Steps: ")) {
                     String input = line.trim();
